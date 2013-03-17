@@ -5,7 +5,6 @@ released under the GPLv3 license.
 http://jabapyth.github.com/pm/
 '''
 
-import yaml
 import os
 import sys
 from os.path import join

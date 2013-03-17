@@ -152,6 +152,9 @@ The file ``config.yaml`` contains configuration options. Things like:
 - allow_untested_bugs ; otherwise pm won't let you close a bug that doesn't
   have a test attached to it (without you passing a --untestable parameter or
   something)
+- currently_active_project: should be stored here. Then "start" ing without
+  any args defaults to working on this project, and making a new task without
+  an explicit parent defaults to being inside of this project.
 
 timesheet.yaml
 ------------
@@ -162,6 +165,9 @@ Here we have recorded all the times you work on things. This looks like::
     start: datetime started
     end: datetime ended
     finished: whether or not you finished what you were working on
+
+  ## perhaps instead we need not "start" and "end", but just a "times:".
+  Because then we could have 
 
 Thoughts:
 
