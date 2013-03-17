@@ -1,0 +1,4 @@
+*.swp
+*.swo
+*.pyc
+test/__pycached__
