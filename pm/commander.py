@@ -18,15 +18,14 @@ class CommandManager:
     def add(self, options, name=None):
         '''Use as a @decorator, to add a command function'''
         def inner(cmd):
-            if name is None:
-                name = cmd.__name__
+            _name = name if name else cmd.__name__
             if not self.subgroup:
                 self.subgroup = self.parser.add_subparsers()
-            self.addcmd(name, options, cmd)
+            self.addcmd(_name, options, cmd)
             return cmd
         return inner
 
-    def addcmd(self, name, options, cmd):
+    def addcmd(self, name, arguments, cmd):
         sub = self.subgroup.add_parser(name)
         self.cmds[name] = cmd
         for arg in arguments:

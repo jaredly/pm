@@ -5,8 +5,8 @@ released under the GPLv3 license.
 http://jabapyth.github.com/pm/
 '''
 
-from cli import run_cmd
-from pm import ProjectManager
+from .cli import cli
+from .pm import ProjectManager
 
 
 # vim: et sw=4 sts=4

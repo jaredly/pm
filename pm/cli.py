@@ -11,6 +11,7 @@ import sys
 from os.path import join
 
 import logging
+import datetime
 from subprocess import call
 
 from .clitools import get_option, get_yesno, get_string
@@ -50,7 +51,12 @@ cli = CommandManager('pm')
         ]
     }])
 def init(options):
-    '''Run the 'init' command!'''
+    '''Run the 'init' command!
+    
+    - default: create the stuff, then ask if you want to commit
+    - -c commit without asking
+    - -n don't commit, don't ask
+    '''
 
     basedir = find_basedir(os.getcwd())
     if not basedir:
@@ -92,6 +98,21 @@ def init(options):
         'default': None
     }])
 def update(options):
+    '''Update everything. Go through the yml files to see if anything needs updating.
+
+    - -d --date xx-xx-xxxx | [today] | yesterday
+    '''
+
+    pm = ProjectManager(basedir)
+    pm.update(date)
+    # load the main project file
+
+    # load the tasks
+
+    # load the goals
+
+    # load the timesheet
+
     pass
 
 # vim: et sw=4 sts=4

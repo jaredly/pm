@@ -41,6 +41,6 @@ items:
         open(join(pm, self.consts['PROJECT_FILE']), 'w').write(text)
         open(join(pm, self.consts['TIMESHEET_FILE']), 'w').write('')
         open(join(pm, self.consts['CONFIG_FILE']), 'w').write('')
-
+    
 
 # vim: et sw=4 sts=4
