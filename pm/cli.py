@@ -28,6 +28,15 @@ def find_basedir(curdir):
             return curdir
         curdir = os.path.dirname(curdir)
 
+def ensure_basedir(curdir):
+    basedir = find_basedir(curdir)
+    if not basedir:
+        raise UserError('No git repository found')
+    if not os.path.isdir(join(basedir, ProjectManager.consts['DIR_NAME'])):
+        raise UserError('no {}/ found. Need to run pm init?\n'
+                        'exiting.'.format(ProjectManager.consts['DIR_NAME']))
+    return basedir
+
 cli = CommandManager('pm')
 
 @cli.add([{
@@ -103,16 +112,49 @@ def update(options):
     - -d --date xx-xx-xxxx | [today] | yesterday
     '''
 
+    basedir = ensure_basedir(os.getcwd())
     pm = ProjectManager(basedir)
     pm.update(date)
-    # load the main project file
 
-    # load the tasks
+@cli.add([{
+    'dest': 'task'
+}])
+def start(options):
+    '''Start things
 
-    # load the goals
+    '''
 
-    # load the timesheet
+    basedir = ensure_basedir(os.getcwd())
+    pm = ProjectManager(basedir)
+    pm.start(options.task)
 
-    pass
+@cli.add([])
+def stop(options):
+    '''Stop things'''
+    basedir = ensure_basedir(os.getcwd())
+    pm = ProjectManager(basedir)
+    pm.stop()
+
+@cli.add([])
+def done(options):
+    '''Done things'''
+    basedir = ensure_basedir(os.getcwd())
+    pm = ProjectManager(basedir)
+    pm.stop(True)
+
+@cli.add([{
+    'dest': 'task'
+}, {
+    'options': ['-d', '--done'],
+    'dest': 'done',
+    'default': False,
+    'action': 'store_true'
+}])
+def next(options):
+    '''Done things'''
+    basedir = ensure_basedir(os.getcwd())
+    pm = ProjectManager(basedir)
+    pm.next(options.task, options.done)
+
 
 # vim: et sw=4 sts=4

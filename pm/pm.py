@@ -7,7 +7,35 @@ http://jabapyth.github.com/pm/
 
 import os
 import sys
+import datetime
 from os.path import join
+
+def tail(f, window=20):
+    BUFSIZ = 1024
+    f.seek(0, 2)
+    bytes = f.tell()
+    size = window
+    block = -1
+    data = []
+    while size > 0 and bytes > 0:
+        if (bytes - BUFSIZ > 0):
+            # Seek back one whole BUFSIZ
+            f.seek(block*BUFSIZ, 2)
+            # read BUFFER
+            data.append(f.read(BUFSIZ))
+        else:
+            # file too small, start from begining
+            f.seek(0,0)
+            # only read what was not read
+            data.append(f.read(bytes))
+        linesFound = data[-1].count('\n')
+        size -= linesFound
+        bytes -= BUFSIZ
+        block -= 1
+    return ''.join(data).splitlines()
+
+def last_lines(fn):
+    return tail(open(fn), 2)
 
 class UserError(Exception):
     '''The user did something wrong'''
@@ -41,6 +69,57 @@ items:
         open(join(pm, self.consts['PROJECT_FILE']), 'w').write(text)
         open(join(pm, self.consts['TIMESHEET_FILE']), 'w').write('')
         open(join(pm, self.consts['CONFIG_FILE']), 'w').write('')
+
+    def start(self, what):
+        pm = join(self.basedir, self.consts['DIR_NAME'])
+        fn = join(pm, self.consts['TIMESHEET_FILE'])
+        lines = last_lines(fn)
+        if lines:
+            last = lines[-1].strip()
+            if last.startswith('-') or last.startswith('start'):
+                raise UserError('Already working on {}'.format(lines[0]))
+        open(fn, 'aw').write('- name: {}\n  start: {}\n  '.format(what,
+                                datetime.datetime.now().isoformat()))
+
+    def stop(self, done=False):
+        pm = join(self.basedir, self.consts['DIR_NAME'])
+        fn = join(pm, self.consts['TIMESHEET_FILE'])
+        lines = last_lines(fn)
+        if not lines:
+            print lines, pm, fn
+            raise UserError('Not working on anything')
+        last = lines[-2].strip()
+        if not (last.startswith('-') or last.startswith('start')):
+            print lines, pm, fn
+            raise UserError('Not working on anything')
+        text = 'end: {}\n'.format(datetime.datetime.now().isoformat())
+        if done:
+            text += '  done: true\n'
+        open(fn, 'aw').write(text)
+
+    def next(self, what, done=False):
+        self.stop(done)
+        self.start(what)
+
+    def update(self, date=None):
+        '''Update eveything ...
+
+        if date is given, treat that as "today"
+        '''
+
+        if date is None:
+            date = datetime.date.today()
+
+        # load the main project file
+
+        # load the tasks
+
+        # load the goals
+
+        # load the timesheet
+
+
+
     
 
 # vim: et sw=4 sts=4

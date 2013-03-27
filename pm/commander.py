@@ -6,6 +6,7 @@ http://jabapyth.github.com/pm/
 
 '''
 
+import sys
 import argparse
 
 class CommandManager:
@@ -28,17 +29,14 @@ class CommandManager:
     def addcmd(self, name, arguments, cmd):
         sub = self.subgroup.add_parser(name)
         self.cmds[name] = cmd
+        sub.set_defaults(cmd_name=name)
         for arg in arguments:
             add_argdict(sub, arg)
 
     def run(self, args):
         options = self.parser.parse_args(args)
-        if 'cmd_name' in options and options.cmd_name in self.cmd:
-            try:
-                self.cmd[options.cmd_name](options)
-            except UserError as e:
-                sys.stderr.write('Error: {}\n'.format(e))
-                return
+        if 'cmd_name' in options and options.cmd_name in self.cmds:
+            self.cmds[options.cmd_name](options)
         else:
             sys.stderr.write('Invalid command specified.')
             return
