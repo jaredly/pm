@@ -40,12 +40,12 @@ def test_parse_date(input, expected):
     else:
         assert parse_date.parse_date(input) == expected
 
-deftime = {
-    'year':2013, 'month': 5, 'day': 4, 'hour': 3, 'minute': 2
+todaydct = {
+    'year':2000, 'month': 1, 'day': 20, 'hour': 13, 'minute': 55
 }
 
-today = datetime.datetime(year=2000, month=1, day=20, hour=13, minute=55)
-dtime = datetime.datetime(**deftime)
+today = datetime.datetime(**todaydct)
+# dtime = datetime.datetime(**deftime)
 tomorrow = today + datetime.timedelta(1)
 yesterday = today - datetime.timedelta(1)
 
@@ -56,21 +56,19 @@ yesterday = today - datetime.timedelta(1)
     ('yesterday', yesterday),
     ('04-10-13', {'month': 4, 'day': 10, 'year': 2013}),
     ('04-10-13.4:30', {'month': 4, 'day': 10, 'year': 2013, 'hour': 4, 'minute': 30}),
-    ('', dtime),
+    ('', None),
     ('toda', False),
     ('tomorra', False),
 ))
 def test_parse_datetime(input, expected):
-    if expected is False:
-        with pytest.raises(ValueError):
-            res = parse_date.parse_datetime(input, dtime, today)
-    else:
-        result = parse_date.parse_datetime(input, dtime, today)
-        if isinstance(expected, datetime.datetime):
-            assert result == expected
-        elif isinstance(expected, dict):
-            dct = deftime.copy()
-            dct.update(expected)
-            assert result == datetime.datetime(**dct)
+    result = parse_date.parse_datetime(input, today)
+    if isinstance(expected, datetime.datetime):
+        assert result == expected
+    elif isinstance(expected, dict):
+        dct = todaydct.copy()
+        dct.update(expected)
+        assert result == datetime.datetime(**dct)
+    elif not expected:
+        assert not result
 
 # vim: et sw=4 sts=4

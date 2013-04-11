@@ -4,11 +4,11 @@ import datetime
 
 time_fmt = '%m-%d-%y.%H:%M'
 
-def parse_datetime(text, deftime, now):
+def parse_datetime(text, now):
     '''A full date looks like mm-dd-yy.HH:MM'''
     text = text.strip().lower()
     if not text:
-        return deftime
+        return None
     if text == 'today':
         return now
     if text == 'yesterday':
@@ -21,32 +21,32 @@ def parse_datetime(text, deftime, now):
         pass
     # if it's not in the basic idea, then you get: 
     parts = text.split('.')
-    dct = {'day': deftime.day, 'month': deftime.month, 'year': deftime.year,
-           'minute': deftime.minute, 'hour': deftime.hour}
+    dct = {'day': now.day, 'month': now.month, 'year': now.year,
+           'minute': now.minute, 'hour': now.hour}
     if len(parts) == 2:
         date = parse_date(parts[0])
         if date is False:
-            raise ValueError('Invalid date: %s' % parts[0])
+            return None # raise ValueError('Invalid date: %s' % parts[0])
         dct.update(date)
         time = parse_time(parts[1])
         if time is False:
-            raise ValueError('Invalid time: %s' % parts[0])
+            return None # raise ValueError('Invalid time: %s' % parts[0])
         dct.update(time)
     elif len(parts) == 1:
         if '-' in text:
             date = parse_date(text)
             if date is False:
-                raise ValueError('Invalid date: %s' % parts[0])
+                return None # raise ValueError('Invalid date: %s' % parts[0])
             dct.update(date)
         elif ':' in text:
             time = parse_time(text)
             if time is False:
-                raise ValueError('Invalid time: %s' % parts[0])
+                return None # raise ValueError('Invalid time: %s' % parts[0])
             dct.update(time)
         else:
-            raise ValueError('Invalid date: %s' % text)
+            return None # raise ValueError('Invalid date: %s' % text)
     else:
-        raise ValueError('Invalid date: %s' % text)
+        return None # raise ValueError('Invalid date: %s' % text)
     return datetime.datetime(**dct)
 
 def parse_date(text):
