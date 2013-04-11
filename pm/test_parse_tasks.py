@@ -79,12 +79,24 @@ def test_process_body(input, output):
     compare_tasks(task, task2)
     # assert task == task2
 
-def compare_tasks(t1, t2):
+'''
+- one
+# [{"name": "one", "id": 1}]
+'''
+inputs = [one.strip().split('\n#') for one in text.split('#\n') if one.strip()]
+@pytest.mark.parametrize(('input', 'output'), inputs)
+def test_parse_tasks(input, output):
+    yaml = syck.load(input)
+    tmap = parse_tasks.TaskMap(yaml, today)
+    tasks = [parse_tasks.inflate_task(item) for item in json.loads(output.strip())]
+    [compare_tasks(t1, t2, True) for t1, t2 in zip(tmap.tasks, tasks)]
+
+def compare_tasks(t1, t2, check_id=False):
     for k in t1:
         if k == 'id':
             continue
         elif k == 'items':
-            [compare_tasks(s1, s2) for s1, s2 in zip(t1['items'], t2['items'])]
+            [compare_tasks(s1, s2, check_id) for s1, s2 in zip(t1['items'], t2['items'])]
         else:
             assert t1[k] == t2[k]
 
