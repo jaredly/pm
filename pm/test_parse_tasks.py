@@ -79,12 +79,31 @@ def test_process_body(input, output):
     compare_tasks(task, task2)
     # assert task == task2
 
-'''
+text2 = '''
 - one
-# [{"name": "one", "id": 1}]
+# [{"name": "one", "id": 1}] #
+- one|1
+- two
+# [{"name": "one", "id": 1}, {"name": "two", "id": 2}] #
+- one|2
+- two
+# [{"name": "one", "id": 2}, {"name": "two", "id": 3}] #
+- one|1
+- two
+- three|2
+# [{"name": "one", "id": 1},
+   {"name": "two", "id": 3},
+   {"name": "three", "id": 2}] #
+- one|1:
+    - two
+# [{"name": "one", "id": 1, "items": [{"name": "two", "id": 2}]}] #
+- one:
+    - two|1
+# [{"name": "one", "id": 2, "items": [{"name": "two", "id": 1}]}] #
 '''
-inputs = [one.strip().split('\n#') for one in text.split('#\n') if one.strip()]
-@pytest.mark.parametrize(('input', 'output'), inputs)
+inputs2 = [one.strip().split('\n#') for one in text2.split('#\n') if one.strip()]
+@pytest.mark.parametrize(('input', 'output'), inputs2)
+@pytest.mark.now
 def test_parse_tasks(input, output):
     yaml = syck.load(input)
     tmap = parse_tasks.TaskMap(yaml, today)
@@ -93,7 +112,7 @@ def test_parse_tasks(input, output):
 
 def compare_tasks(t1, t2, check_id=False):
     for k in t1:
-        if k == 'id':
+        if k == 'id' and not check_id:
             continue
         elif k == 'items':
             [compare_tasks(s1, s2, check_id) for s1, s2 in zip(t1['items'], t2['items'])]

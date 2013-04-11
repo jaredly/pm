@@ -65,6 +65,14 @@ class TaskMap:
         self.max = 0
         self.today = today
         self.tasks = self.process_subtasks(raw)
+        self.reassign()
+
+    def reassign(self):
+        for i in xrange(1, self.unassigned + 1):
+            self.unassigneds[i]['id'] = self.max + i
+        self.max += self.unassigned
+        self.unassigned = 0
+        self.unassigneds = {}
 
     def unassign(self, task):
         self.unassigned += 1
