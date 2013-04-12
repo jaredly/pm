@@ -22,17 +22,17 @@ def mktime(dct):
 @pytest.mark.parametrize(('input', 'output'), (
     ('Hello world', {'name':'Hello world'}),
     ('Do homework|5', {'name': 'Do homework', 'id': 5}),
-    ('fly||today', {'name':'fly', 'created': today}),
-    ('fly|||tomorrow', {'name':'fly', 'modified': tomorrow}),
-    ('fly||||yesterday', {'name':'fly', 'completed': yesterday}),
-    ('fly||||10:20', {'name':'fly', 'completed': mktime({'hour':10, 'minute':20})}),
+    ('fly||today', {'name':'fly', 'created': 'today'}),
+    ('fly|||tomorrow', {'name':'fly', 'modified': 'tomorrow'}),
+    ('fly||||yesterday', {'name':'fly', 'completed': 'yesterday'}),
+    ('fly||||10:20', {'name':'fly', 'completed': '10:20'}),
 ))
 def test_expand_string(input, output):
     if output is False:
         with pytest.raises(ValueError):
             res = parse_tasks.expand_string(input, today)
     else:
-        task = parse_tasks.new_task(output)
+        task = parse_tasks.inflate_task(output, today)
         result = parse_tasks.expand_string(input, today)
         assert result == task
 
@@ -70,14 +70,12 @@ three:
 inputs = [one.strip().split('\n#') for one in text.split('#\n') if one.strip()]
 @pytest.mark.parametrize(('input', 'output'), inputs)
 def test_process_body(input, output):
-    task = parse_tasks.new_task()
-    task2 = parse_tasks.inflate_task(json.loads(output.strip()))
+    task = parse_tasks.inflate_task({}, today)
+    task2 = parse_tasks.inflate_task(json.loads(output.strip()), today)
     yaml = syck.load(input)
     tmap = parse_tasks.TaskMap([], today)
     tmap.process_body(yaml, task)
-    # parse_tasks.process_body(yaml, task, today)
     compare_tasks(task, task2)
-    # assert task == task2
 
 text2 = '''
 - one
@@ -103,11 +101,10 @@ text2 = '''
 '''
 inputs2 = [one.strip().split('\n#') for one in text2.split('#\n') if one.strip()]
 @pytest.mark.parametrize(('input', 'output'), inputs2)
-@pytest.mark.now
 def test_parse_tasks(input, output):
     yaml = syck.load(input)
     tmap = parse_tasks.TaskMap(yaml, today)
-    tasks = [parse_tasks.inflate_task(item) for item in json.loads(output.strip())]
+    tasks = [parse_tasks.inflate_task(item, today) for item in json.loads(output.strip())]
     [compare_tasks(t1, t2, True) for t1, t2 in zip(tmap.tasks, tasks)]
 
 def compare_tasks(t1, t2, check_id=False):
@@ -118,5 +115,20 @@ def compare_tasks(t1, t2, check_id=False):
             [compare_tasks(s1, s2, check_id) for s1, s2 in zip(t1['items'], t2['items'])]
         else:
             assert t1[k] == t2[k]
+
+text3 = '''
+- one
++++
+- one|1|05-04-13.03:02|05-04-13.03:02|
+'''
+inputs3 = [one.strip().split('\n+++\n') for one in text3.split('\n===\n') if one.strip()]
+@pytest.mark.parametrize(('input', 'output'), inputs3)
+@pytest.mark.now
+def test_parse_unparse(input, output):
+    yaml = syck.load(input)
+    tmap = parse_tasks.TaskMap(yaml, today)
+    rawd = tmap.prepare_yaml()
+    res  = syck.dump(rawd)[3:].strip()
+    assert output.strip() == res
 
 # vim: et sw=4 sts=4

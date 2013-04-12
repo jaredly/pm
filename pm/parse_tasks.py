@@ -12,7 +12,8 @@ Tasks have the following attributes:
     items []
 '''
 
-from parse_date import parse_datetime
+from parse_date import parse_datetime, time_fmt
+import datetime
 
 class ParseError(Exception):
     '''Error parsing tasks'''
@@ -27,7 +28,7 @@ def parse_id(text):
     return 0
 
 default_task = {'name': '', 'id': 0, 'created': None,
-        'modified': None, 'completed': None, 'items': None}
+        'modified': None, 'completed': None, 'items': None, 'notes': None}
 
 def new_task(news={}):
     task = default_task.copy()
@@ -35,10 +36,32 @@ def new_task(news={}):
     task.update(news)
     return task
 
-def inflate_task(dct):
+def dates_dct(today):
+    return {'today': today,
+            'yesterday': today + datetime.timedelta(-1),
+            'tomorrow': today + datetime.timedelta(1)}
+
+def inflate_date(text, dates, default):
+    if text in dates:
+        return dates[text]
+    elif not text or not text.strip():
+        return default
+    date = parse_datetime(text, dates['today'])
+    if not date:
+        return default
+    return date
+
+def inflate_task(dct, today):
     task = new_task(dct)
-    task['items'] = map(inflate_task, task['items'])
+    task['items'] = [inflate_task(item, today) for item in task['items']]
+    dates = dates_dct(today)
+    task['created'] = inflate_date(task['created'], dates, today)
+    task['modified'] = inflate_date(task['modified'], dates, today)
+    task['completed'] = inflate_date(task['completed'], dates, None)
     return task
+
+def collapse_string(task):
+    return '{name}|{id}|{created}|{modified}|{completed}'.format(**task)
 
 def expand_string(text, today):
     '''A collapsed string looks like "title|id|created|modified|completed"'''
@@ -54,9 +77,14 @@ def expand_string(text, today):
         data['modified'] = parse_datetime(parts[3], today)
     if len(parts) > 4:
         data['completed'] = parse_datetime(parts[4], today)
+    if data.get('created', None) is None:
+        data['created'] = today
+    if data.get('modified', None) is None:
+        data['modified'] = today
     return new_task(data)
 
 class TaskMap:
+    '''This handles all of the task parsing.'''
     def __init__(self, raw, today):
         self.tmap = {}
         self.tasks = []
@@ -119,6 +147,30 @@ class TaskMap:
                     task['items'] = self.process_subtasks(raw['items'])
                 return True
         task['items'] = self.process_subtasks(raw)
+
+    def prepare_yaml(self):
+        '''Return a simplified list of tasks [with dates converted to strings]'''
+        return [tasktoyaml(sub) for sub in self.tasks]
+
+def tasktoyaml(task):
+    task = task.copy()
+    task['created'] = task['created'].strftime(time_fmt)
+    task['modified'] = task['modified'].strftime(time_fmt)
+    if task['completed']:
+        task['completed'] = task['completed'].strftime(time_fmt)
+    else:
+        task['completed'] = ''
+    task['items'] = [tasktoyaml(sub) for sub in task['items']]
+    main = collapse_string(task)
+    if task['notes']:
+        res = {main:{'notes': task['notes']}}
+        if task['items']:
+            res[main]['items'] = task['items']
+    elif task['items']:
+        res = {main:task['items']}
+    else:
+        res = main
+    return main
 
 def parse_tasks(fname):
     raw = syck.load(open(fname).read())
