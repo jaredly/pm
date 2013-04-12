@@ -4,7 +4,7 @@ import pytest
 import parse_tasks
 import datetime
 
-import syck
+import yaml
 import json
 
 deftime = {
@@ -72,9 +72,9 @@ inputs = [one.strip().split('\n#') for one in text.split('#\n') if one.strip()]
 def test_process_body(input, output):
     task = parse_tasks.inflate_task({}, today)
     task2 = parse_tasks.inflate_task(json.loads(output.strip()), today)
-    yaml = syck.load(input)
+    ydata = yaml.load(input)
     tmap = parse_tasks.TaskMap([], today)
-    tmap.process_body(yaml, task)
+    tmap.process_body(ydata, task)
     compare_tasks(task, task2)
 
 text2 = '''
@@ -102,8 +102,8 @@ text2 = '''
 inputs2 = [one.strip().split('\n#') for one in text2.split('#\n') if one.strip()]
 @pytest.mark.parametrize(('input', 'output'), inputs2)
 def test_parse_tasks(input, output):
-    yaml = syck.load(input)
-    tmap = parse_tasks.TaskMap(yaml, today)
+    ydata = yaml.load(input)
+    tmap = parse_tasks.TaskMap(ydata, today)
     tasks = [parse_tasks.inflate_task(item, today) for item in json.loads(output.strip())]
     [compare_tasks(t1, t2, True) for t1, t2 in zip(tmap.tasks, tasks)]
 
@@ -120,15 +120,25 @@ text3 = '''
 - one
 +++
 - one|1|05-04-13.03:02|05-04-13.03:02|
+===
+- one:
+  - two
++++
+- one|1|05-04-13.03:02|05-04-13.03:02|:
+  - two|2|05-04-13.03:02|05-04-13.03:02|
 '''
 inputs3 = [one.strip().split('\n+++\n') for one in text3.split('\n===\n') if one.strip()]
 @pytest.mark.parametrize(('input', 'output'), inputs3)
 @pytest.mark.now
 def test_parse_unparse(input, output):
-    yaml = syck.load(input)
-    tmap = parse_tasks.TaskMap(yaml, today)
+    ydata = yaml.load(input)
+    tmap = parse_tasks.TaskMap(ydata, today)
     rawd = tmap.prepare_yaml()
-    res  = syck.dump(rawd)[3:].strip()
-    assert output.strip() == res
+    res  = yaml.dump(rawd, default_flow_style=False)
+    assert output.strip() == res.strip()
+
+    # parse the generated output, make sure it matches
+    tmap2 = parse_tasks.TaskMap(yaml.load(res), today)
+    assert tmap.tasks == tmap2.tasks
 
 # vim: et sw=4 sts=4

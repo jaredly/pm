@@ -170,7 +170,7 @@ def tasktoyaml(task):
         res = {main:task['items']}
     else:
         res = main
-    return main
+    return res
 
 def parse_tasks(fname):
     raw = syck.load(open(fname).read())

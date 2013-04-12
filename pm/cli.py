@@ -114,7 +114,7 @@ def update(options):
 
     basedir = ensure_basedir(os.getcwd())
     pm = ProjectManager(basedir)
-    pm.update(date)
+    pm.update(options.date)
 
 @cli.add([{
     'dest': 'task'

@@ -10,6 +10,9 @@ import sys
 import datetime
 from os.path import join
 
+import syck
+from parse_tasks import TaskMap
+
 def tail(f, window=20):
     BUFSIZ = 1024
     f.seek(0, 2)
@@ -44,6 +47,7 @@ class ProjectManager:
     consts = {
         'DIR_NAME': '.pm',
         'PROJECT_FILE': 'project.yaml',
+        'TASKS_FILE': 'tasks.yaml',
         'TIMESHEET_FILE': 'timesheet.yaml',
         'CONFIG_FILE': 'config.yaml',
         'PROJECT_TEMPLATE': '''\
@@ -56,6 +60,9 @@ items:
 
     def __init__(self, basedir):
         self.basedir = basedir
+        self.files = {}
+        self.files['TASKS_FILE'] = join(self.basedir, self.consts['DIR_NAME'],
+                                          self.consts['TASKS_FILE'])
 
     def init(self, name, author, version):
         pm = join(self.basedir, self.consts['DIR_NAME'])
@@ -108,11 +115,16 @@ items:
         '''
 
         if date is None:
-            date = datetime.date.today()
+            date = datetime.datetime.now()
 
         # load the main project file
 
         # load the tasks
+        data = open(self.files['TASKS_FILE']).read()
+        yaml = syck.load(data)
+        tmap = TaskMap(yaml, date)
+        out  = syck.dump(tmap.prepare_yaml())[3:].strip()
+        open(self.files['TASKS_FILE']+'.new.yaml', 'w').write(out + '\n')
 
         # load the goals
 
