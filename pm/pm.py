@@ -10,7 +10,7 @@ import sys
 import datetime
 from os.path import join
 
-import syck
+import yaml
 from parse_tasks import TaskMap
 
 def tail(f, window=20):
@@ -121,10 +121,10 @@ items:
 
         # load the tasks
         data = open(self.files['TASKS_FILE']).read()
-        yaml = syck.load(data)
-        tmap = TaskMap(yaml, date)
-        out  = syck.dump(tmap.prepare_yaml())[3:].strip()
-        open(self.files['TASKS_FILE']+'.new.yaml', 'w').write(out + '\n')
+        ydata = yaml.load(data)
+        tmap = TaskMap(ydata, date)
+        out  = yaml.dump(tmap.prepare_yaml(), default_flow_style=False)
+        open(self.files['TASKS_FILE'], 'w').write(out + '\n')
 
         # load the goals
 

@@ -1,0 +1,68 @@
+- Design|1|04-12-13.00:52|04-12-13.00:52|:
+  - flesh out the models|2|04-12-13.00:52|04-12-13.00:52|
+  - look at all the tasks that need to be done.|3|04-12-13.00:52|04-12-13.00:52|
+- Code|4|04-12-13.00:52|04-12-13.00:52|:
+  - init|5|04-12-13.00:52|04-12-13.00:52|:
+    - super basic|6|04-12-13.00:52|04-12-13.00:52|04-12-13.00:52
+    - work with .hg as well|7|04-12-13.00:52|04-12-13.00:52|
+  - tasks.yaml|21|04-12-13.00:54|04-12-13.00:54|04-12-13.00:54:
+    - parsing|22|04-12-13.00:54|04-12-13.00:54|
+    - dumping|23|04-12-13.00:54|04-12-13.00:54|
+    - tested|24|04-12-13.00:54|04-12-13.00:54|:
+      - need for just a few last functions|25|04-12-13.00:54|04-12-13.00:54|
+  - project.yaml|8|04-12-13.00:52|04-12-13.00:52|:
+    - parsing|9|04-12-13.00:52|04-12-13.00:52|
+    - writing|10|04-12-13.00:52|04-12-13.00:52|
+  - time tracker|11|04-12-13.00:52|04-12-13.00:52|:
+      items:
+      - start|12|04-12-13.00:52|04-12-13.00:52|:
+          notes: >
+            This would add an entry to the timesheet.yaml file, and have "active"
+            be true, and not have an end time. Options:
+
+            -n "task name" -p "parent fragment"
+
+            If you give a parent fragment, it will search to see if that fragment
+            is a unique initial sequence. If its not, it asks you to select from the
+            matching list it found.
+      - stop|13|04-12-13.00:52|04-12-13.00:52|:
+          notes: >
+            This would turn off "active", and add the end time.
+      - done|14|04-12-13.00:52|04-12-13.00:52|:
+          notes: >
+            This would do the same as stop, but also add the "completed:true", and
+            mark the current item "done"
+      - resume|15|04-12-13.00:52|04-12-13.00:52|:
+          notes: >
+            So this would start you working on the most recent thing you were working
+            on that wasnt completed.
+      - pause|16|04-12-13.00:52|04-12-13.00:52|:
+          notes: >
+            This would change  ,,, !!! So Im considering removing this. I dont know
+            that it really adds value. I mean, maybe it does, but not atm.
+      notes: >
+        Somehow I think there should be a notion of "currently active project ...
+        ish. or parent." such that instead of defaulting to working in the global
+        context, it has you work on this project, whenever you just to "start", without
+        any options. And if you do "new task", then its make as a child of this currently
+        active thing. So I guess that would go in config, wouldnt it.
+
+        Example use case: Coq. Thinking Im working on a particular file, so that would
+        be a sub-project I imagine. And I want that to be the "cwd" as it were.
+- Website|17|04-12-13.00:52|04-12-13.00:52|:
+    notes: >
+      Put together a nice-looking "intro to PM" site for us, to be hosted on gh-pages
+- Vim integration|18|04-12-13.00:52|04-12-13.00:52|:
+    notes: >
+      Man it would be super cool to have this totally vim integrated, so that when
+      I'm doing coq proofs I can track my time super well. Man that would be really
+      awesome.'
+- Optimization|19|04-12-13.00:52|04-12-13.00:52|:
+    items:
+    - investigate yaml optimizations|20|04-12-13.00:52|04-12-13.00:52|:
+        notes: >
+          investigate "roll my own pseudo-yaml" _or_ find another, faster library.
+          Because startup time is important.
+    notes: "Is there any feasible way of making the startup time faster? Yaml is looking\
+      \ like a .3 second drag on the whole show. \n"
+

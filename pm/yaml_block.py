@@ -22,7 +22,7 @@ class block(unicode):
 
 def block_presenter(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='>')
-yaml.add_representer(literal, literal_presenter)
+yaml.add_representer(block, block_presenter)
 
 def ordered_dict_presenter(dumper, data):
     return dumper.represent_dict(data.items())

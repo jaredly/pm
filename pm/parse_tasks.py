@@ -14,6 +14,7 @@ Tasks have the following attributes:
 
 from parse_date import parse_datetime, time_fmt
 import datetime
+from yaml_block import block
 
 class ParseError(Exception):
     '''Error parsing tasks'''
@@ -131,10 +132,16 @@ class TaskMap:
             for item in raw:
                 if type(item) == str:
                     tasklist.append(self.add_task(item, None))
-                if type(item) == dict:
+                elif type(item) == dict:
                     if len(item) == 1:
                         k = item.keys()[0]
                         tasklist.append(self.add_task(k, item[k]))
+                    else:
+                        print 'Invalid!!', item
+                else:
+                    print 'Fail', item
+        else:
+            print 'Bad', raw
         return tasklist
 
     def process_body(self, raw, task):
@@ -163,7 +170,7 @@ def tasktoyaml(task):
     task['items'] = [tasktoyaml(sub) for sub in task['items']]
     main = collapse_string(task)
     if task['notes']:
-        res = {main:{'notes': task['notes']}}
+        res = {main:{'notes': block(task['notes'])}}
         if task['items']:
             res[main]['items'] = task['items']
     elif task['items']:
@@ -171,10 +178,5 @@ def tasktoyaml(task):
     else:
         res = main
     return res
-
-def parse_tasks(fname):
-    raw = syck.load(open(fname).read())
-    tmap = TaskMap(raw)
-
 
 # vim: et sw=4 sts=4
